@@ -1,32 +1,42 @@
-import MeetupList from "../components/meetups/MeetupList"
+import { MongoClient } from "mongodb";
+import MeetupList from "../components/meetups/MeetupList";
+import Head from "next/head";
 
-export const MEETUPS = [
-  {
-    id: 'm1',
-    title: 'First Meetup',
-    address: 'Somewhere around Germany',
-    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Stadtbild_M%C3%BCnchen.jpg/1280px-Stadtbild_M%C3%BCnchen.jpg",
-    description: 'This is our first meetup' 
-  },
-  {
-    id: 'm2',
-    title: 'Second Meetup',
-    address: 'Somewhere around Spain',
-    image: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/16/8c/37/29/photo1jpg.jpg?w=1200&h=-1&s=1",
-    description: 'This is our second meetup' 
-  }
-]
+export async function getStaticProps() {  // prerendered, executed during the build process, never going to end up on the client side
+  // fetch data from an API
+  const client = await MongoClient.connect(
+    "mongodb+srv://gerasim:FnjEoeOLUfB8sNOG@cluster0.twemwgd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+  );
+  const db = client.db();
 
-export async function getStaticProps(){ // prerendered, executed during the build process, never going to end up on the client side
-  // fetch data from an API  
+  const meetupsCollections = db.collection("meetups");
+  const meetups = await meetupsCollections.find().toArray();
+  client.close();
   return {
-    props: { // these are the props that the HomePage accepts
-      meetups: MEETUPS
+    props: {
+      // these are the props that the HomePage accepts
+      meetups: meetups.map((meetup) => ({
+        title: meetup.title,
+        address: meetup.address,
+        image: meetup.image,
+        id: meetup._id.toString(),
+      })),
     },
-    revalidate: 10
-  }
+    revalidate: 10,
+  };
 }
 
-export default function HomePage(props){
-  return <MeetupList meetups={props.meetups}/>
+export default function HomePage(props) {
+  return (
+    <>
+      <Head>
+        <title>React Meetups</title>
+        <meta 
+          name="description"
+          content="Browse a huge list of active React meetups"
+        />
+      </Head>
+      <MeetupList meetups={props.meetups} />;
+    </>  
+  )
 }
