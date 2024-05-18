@@ -1,7 +1,9 @@
+import NewMeetupForm from "../../components/meetups/NewMeetupForm"
+
 export default function NewMeetup(){
-  return (
-    <>
-      <h1>Add a meetup event</h1>
-    </>
-  )
+  function addMeetupHandler(data){
+    console.log(data)
+  }
+
+  return <NewMeetupForm onAddMeetup={addMeetupHandler}/>
 }
