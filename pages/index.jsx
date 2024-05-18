@@ -17,6 +17,16 @@ export const MEETUPS = [
   }
 ]
 
-export default function HomePage(){
-  return <MeetupList meetups={MEETUPS}/>
+export async function getStaticProps(){ // prerendered, executed during the build process, never going to end up on the client side
+  // fetch data from an API  
+  return {
+    props: { // these are the props that the HomePage accepts
+      meetups: MEETUPS
+    },
+    revalidate: 10
+  }
+}
+
+export default function HomePage(props){
+  return <MeetupList meetups={props.meetups}/>
 }
